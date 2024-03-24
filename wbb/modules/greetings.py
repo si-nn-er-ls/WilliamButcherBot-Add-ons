@@ -521,7 +521,6 @@ async def captcha_state(_, message):
         await message.reply_text("Disabled Captcha For New Users.")
     elif state == "mode":
         check = await captcha_mode(chat_id)
-        print(check)
         if check == "text":
             buttons = {"Text": "cmode_emoji"}
         elif check == "emoji":
