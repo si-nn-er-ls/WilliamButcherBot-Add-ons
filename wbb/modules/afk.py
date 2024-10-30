@@ -6,9 +6,9 @@
 # Please see < https://github.com/TeamYukki/YukkiAFKBot/blob/master/LICENSE >
 #
 # All rights reserved
-# 
+#
 # Modified plugin by @MissKatyPyro from https://github.com/TeamYukki/YukkiAFKBot to make compatible with pyrogram v2
-# Re-modified by @Hybridvamp for WilliamButcherBot 
+# Re-modified by @Hybridvamp for WilliamButcherBot
 
 import re
 import time
@@ -40,6 +40,7 @@ Just type something in group to remove AFK Status."""
 afk_group = 13
 cleanmode = {}
 
+
 async def put_cleanmode(chat_id, message_id):
     if chat_id not in cleanmode:
         cleanmode[chat_id] = []
@@ -49,6 +50,7 @@ async def put_cleanmode(chat_id, message_id):
         "timer_after": time_now + timedelta(minutes=1),
     }
     cleanmode[chat_id].append(put)
+
 
 @app.on_message(filters.command("afk"))
 @capture_err
@@ -71,38 +73,48 @@ async def active_afk(_, message: Message):
             if afktype == "animation":
                 text = "**{usr}** [<code>{id}</code>] is back online and was away for {tm}\n\n"
                 send = (
-                    await message.reply_animation(
-                        data,
-                        caption=text.format(
-                            usr=message.from_user.mention, id=message.from_user.id, tm=seenago
-                        ),
-                    )
-                    if str(reasonafk) == "None"
-                    else await message.reply_animation(
-                        data,
-                        caption=f"**{message.from_user.mention}** [<code>{message.from_user.id}</code>] is back online and was away for {seenago}\n\n**Reason:** `{reasonafk}`\n\n"
-                        ),
-                    )
+                    (
+                        await message.reply_animation(
+                            data,
+                            caption=text.format(
+                                usr=message.from_user.mention,
+                                id=message.from_user.id,
+                                tm=seenago,
+                            ),
+                        )
+                        if str(reasonafk) == "None"
+                        else await message.reply_animation(
+                            data,
+                            caption=f"**{message.from_user.mention}** [<code>{message.from_user.id}</code>] is back online and was away for {seenago}\n\n**Reason:** `{reasonafk}`\n\n",
+                        )
+                    ),
+                )
             elif afktype == "photo":
                 text = "**{usr}** [<code>{id}</code>] is back online and was away for {tm}\n\n"
                 send = (
-                    await message.reply_photo(
-                        photo=f"downloads/{user_id}.jpg",
-                        caption=text.format(
-                            usr=message.from_user.mention, id=message.from_user.id, tm=seenago
-                        ),
-                    )
-                    if str(reasonafk) == "None"
-                    else await message.reply_photo(
-                        photo=f"downloads/{user_id}.jpg",
-                        caption=f"**{message.from_user.mention}** [<code>{message.from_user.id}</code>] is back online and was away for {seenago}\n\n**Reason:** `{reasonafk}`\n\n",
-                        ),
-                    )
+                    (
+                        await message.reply_photo(
+                            photo=f"downloads/{user_id}.jpg",
+                            caption=text.format(
+                                usr=message.from_user.mention,
+                                id=message.from_user.id,
+                                tm=seenago,
+                            ),
+                        )
+                        if str(reasonafk) == "None"
+                        else await message.reply_photo(
+                            photo=f"downloads/{user_id}.jpg",
+                            caption=f"**{message.from_user.mention}** [<code>{message.from_user.id}</code>] is back online and was away for {seenago}\n\n**Reason:** `{reasonafk}`\n\n",
+                        )
+                    ),
+                )
             elif afktype == "text":
                 text = "**{usr}** [<code>{id}</code>] is back online and was away for {tm}\n\n"
                 send = await message.reply_text(
                     text.format(
-                        usr=message.from_user.mention, id=message.from_user.id, tm=seenago
+                        usr=message.from_user.mention,
+                        id=message.from_user.id,
+                        tm=seenago,
                     ),
                     disable_web_page_preview=True,
                 )
@@ -120,9 +132,7 @@ async def active_afk(_, message: Message):
         except Exception:
             text = "**{usr}** [<code>{id}</code>] is back online"
             send = await message.reply_text(
-                text.format(
-                    usr=message.from_user.first_name, id=message.from_user.id
-                ),
+                text.format(usr=message.from_user.first_name, id=message.from_user.id),
                 disable_web_page_preview=True,
             )
         await put_cleanmode(message.chat.id, send.id)
@@ -185,7 +195,9 @@ async def active_afk(_, message: Message):
                 "reason": None,
             }
         else:
-            await app.download_media(message.reply_to_message, file_name=f"{user_id}.jpg")
+            await app.download_media(
+                message.reply_to_message, file_name=f"{user_id}.jpg"
+            )
             details = {
                 "type": "photo",
                 "time": time.time(),
@@ -202,7 +214,9 @@ async def active_afk(_, message: Message):
                 "reason": _reason,
             }
         else:
-            await app.download_media(message.reply_to_message, file_name=f"{user_id}.jpg")
+            await app.download_media(
+                message.reply_to_message, file_name=f"{user_id}.jpg"
+            )
             details = {
                 "type": "photo",
                 "time": time.time(),
@@ -223,6 +237,7 @@ async def active_afk(_, message: Message):
         text.format(usr=message.from_user.mention, id=message.from_user.id)
     )
     await put_cleanmode(message.chat.id, send.id)
+
 
 @app.on_message(filters.command("afkdel"), group=afk_group)
 @adminsOnly("can_change_info")
@@ -250,6 +265,7 @@ async def afk_state(_, message: Message):
         msg = await message.reply_text(text.format(cmd=message.command[0]))
         await asyncio.sleep(6)
         await msg.delete()
+
 
 @app.on_message(
     filters.group & ~filters.bot & ~filters.via_bot,
@@ -289,22 +305,16 @@ async def afk_watcher_func(self: Client, message: Message):
             seenago = get_readable_time((int(time.time() - timeafk)))
             if afktype == "text":
                 text = "**{usr}** [<code>{id}</code>] is back online and was away for {tm}\n\n"
-                msg += text.format(
-                    usr=user_name, id=userid, tm=seenago
-                )
+                msg += text.format(usr=user_name, id=userid, tm=seenago)
             if afktype == "text_reason":
                 text = "**{usr}** [<code>{id}</code>] is back online and was away for {tm}\n\n**Reason:** `{reas}`\n\n"
-                msg += text.format(
-                    usr=user_name, id=userid, tm=seenago, reas=reasonafk
-                )
+                msg += text.format(usr=user_name, id=userid, tm=seenago, reas=reasonafk)
             if afktype == "animation":
                 if str(reasonafk) == "None":
                     text = "**{usr}** [<code>{id}</code>] is back online and was away for {tm}\n\n"
                     send = await message.reply_animation(
                         data,
-                        caption=text.format(
-                            usr=user_name, id=userid, tm=seenago
-                        ),
+                        caption=text.format(usr=user_name, id=userid, tm=seenago),
                     )
                 else:
                     text = "**{usr}** [<code>{id}</code>] is back online and was away for {tm}\n\n**Reason:** `{reas}`\n\n"
@@ -319,9 +329,7 @@ async def afk_watcher_func(self: Client, message: Message):
                     text = "**{usr}** [<code>{id}</code>] is AFK since {tm} ago.\n\n"
                     send = await message.reply_photo(
                         photo=f"downloads/{userid}.jpg",
-                        caption=text.format(
-                            usr=user_name, id=userid, tm=seenago
-                        ),
+                        caption=text.format(usr=user_name, id=userid, tm=seenago),
                     )
                 else:
                     text = "**{usr}** [<code>{id}</code>] is back online and was away for {tm}\n\n**Reason:** `{reas}`\n\n"
@@ -349,7 +357,9 @@ async def afk_watcher_func(self: Client, message: Message):
                     reasonafk = reasondb["reason"]
                     seenago = get_readable_time((int(time.time() - timeafk)))
                     if afktype == "text":
-                        text = "**{usr}** [<code>{id}</code>] is AFK since {tm} ago.\n\n"
+                        text = (
+                            "**{usr}** [<code>{id}</code>] is AFK since {tm} ago.\n\n"
+                        )
                         msg += text.format(
                             usr=replied_first_name, id=replied_user_id, tm=seenago
                         )
@@ -408,9 +418,7 @@ async def afk_watcher_func(self: Client, message: Message):
                 except Exception as e:
                     await message.reply_text(e)
                     text = "{usr} [<code>{id}</code>] is AFK!."
-                    msg += text.format(
-                        usr=replied_first_name, id=replied_user_id
-                    )
+                    msg += text.format(usr=replied_first_name, id=replied_user_id)
         except:
             pass
 
@@ -493,9 +501,7 @@ async def afk_watcher_func(self: Client, message: Message):
                                 )
                     except:
                         text = "{usr} [<code>{id}</code>] is AFK!."
-                        msg += text.format(
-                            usr=user.first_name[:25], id=user.id
-                        )
+                        msg += text.format(usr=user.first_name[:25], id=user.id)
             elif (entity[j].type) == enums.MessageEntityType.TEXT_MENTION:
                 try:
                     user_id = entity[j].user.id

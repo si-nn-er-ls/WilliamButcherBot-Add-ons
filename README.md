@@ -9,6 +9,7 @@ This repo consists of few Add-ons for [@WilliamButcherBot](https://github.com/Th
 1. **Afk**
 2. **Filemanager**
 3. **Emoji Captcha** 
+4. **ForceSub**
 
 ## patch installation
 

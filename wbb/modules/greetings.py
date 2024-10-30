@@ -1,7 +1,7 @@
 """
 MIT License
 
-Copyright (c) 2023 TheHamkerCat
+Copyright (c) 2024 TheHamkerCat
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -164,15 +164,13 @@ async def handle_new_member(member, chat):
         if member.is_bot:
             return  # Ignore bots
         if not await is_captcha_on(chat.id):
-            return await send_welcome_message(
-                chat, member.id
-            )
+            return await send_welcome_message(chat, member.id)
 
         # Ignore user if he has already solved captcha in this group
         # someday
         if await has_solved_captcha_once(chat.id, member.id):
             return
-            
+
         mode = await captcha_mode(chat.id)
         if mode == "emoji":
             return await emoji_handler(member, chat)
@@ -246,12 +244,11 @@ async def handle_new_member(member, chat):
     await update_captcha_cache(answers_dicc)
 
     asyncio.create_task(
-        kick_restricted_after_delay(
-            WELCOME_DELAY_KICK_SEC, button_message, member
-        )
+        kick_restricted_after_delay(WELCOME_DELAY_KICK_SEC, button_message, member)
     )
     await asyncio.sleep(0.5)
-    
+
+
 async def emoji_handler(member, chat):
     try:
         user_ = await app.get_chat_member(chat.id, member.id)
@@ -261,12 +258,89 @@ async def emoji_handler(member, chat):
         markup = [[], [], []]
         __emojis = data.split(": ", 1)[-1].split()
         print(__emojis)
-        _emojis = ['🐻', '🐔', '☁️', '🔮', '🌀', '🌚', '💎', '🐶', '🍩', '🌏', '🐸', '🌕', '🍏', '🐵', '🌙',
-                   '🐧', '🍎', '😀', '🐍', '❄️', '🐚', '🐢', '🌝', '🍺', '🍔', '🍒', '🍫', '🍡', '🌑', '🍟',
-                   '☕️', '🍑', '🍷', '🍧', '🍕', '🍵', '🐋', '🐱', '💄', '👠', '💰', '💸', '🎹', '📦', '📍',
-                   '🐊', '🦕', '🐬', '💋', '🦎', '🦈', '🦷', '🦖', '🐠', '🐟','💀', '🎃', '👮', '⛑', '🪢', '🧶',
-                   '🧵', '🪡', '🧥', '🥼', '🥻', '🎩', '👑', '🎒', '🙊', '🐗', '🦋', '🦐', '🐀', '🐿', '🦔', '🦦', 
-                   '🦫', '🦡', '🦨', '🐇']
+        _emojis = [
+            "🐻",
+            "🐔",
+            "☁️",
+            "🔮",
+            "🌀",
+            "🌚",
+            "💎",
+            "🐶",
+            "🍩",
+            "🌏",
+            "🐸",
+            "🌕",
+            "🍏",
+            "🐵",
+            "🌙",
+            "🐧",
+            "🍎",
+            "😀",
+            "🐍",
+            "❄️",
+            "🐚",
+            "🐢",
+            "🌝",
+            "🍺",
+            "🍔",
+            "🍒",
+            "🍫",
+            "🍡",
+            "🌑",
+            "🍟",
+            "☕️",
+            "🍑",
+            "🍷",
+            "🍧",
+            "🍕",
+            "🍵",
+            "🐋",
+            "🐱",
+            "💄",
+            "👠",
+            "💰",
+            "💸",
+            "🎹",
+            "📦",
+            "📍",
+            "🐊",
+            "🦕",
+            "🐬",
+            "💋",
+            "🦎",
+            "🦈",
+            "🦷",
+            "🦖",
+            "🐠",
+            "🐟",
+            "💀",
+            "🎃",
+            "👮",
+            "⛑",
+            "🪢",
+            "🧶",
+            "🧵",
+            "🪡",
+            "🧥",
+            "🥼",
+            "🥻",
+            "🎩",
+            "👑",
+            "🎒",
+            "🙊",
+            "🐗",
+            "🦋",
+            "🦐",
+            "🐀",
+            "🐿",
+            "🦔",
+            "🦦",
+            "🦫",
+            "🦡",
+            "🦨",
+            "🐇",
+        ]
         shuffle(_emojis)
         _emojis = _emojis[:20]
         for a in range(len(__emojis)):
@@ -320,7 +394,7 @@ async def emoji_handler(member, chat):
         await __message.delete()
         user = await chat.get_member(member.id)
         if user.status == ChatMemberStatus.RESTRICTED:
-            until_date = (datetime.now() + timedelta(seconds=300))
+            until_date = datetime.now() + timedelta(seconds=300)
             await chat.ban_member(member.id, until_date=until_date)
             del CaptchaDB[member.id]
     except Exception as e:
@@ -333,7 +407,7 @@ async def emoji_handler(member, chat):
 async def welcome(_, user: ChatMemberUpdated):
     if not (
         user.new_chat_member
-        and user.new_chat_member.status not in {CMS.RESTRICTED}
+        and user.new_chat_member.status not in {CMS.RESTRICTED, CMS.BANNED}
         and not user.old_chat_member
     ):
         return
@@ -414,9 +488,7 @@ async def callback_query_welcome_button(_, callback_query):
                 keyboard = i["keyboard"]
 
     if not (correct_answer and keyboard):
-        return await callback_query.answer(
-            "Something went wrong, Rejoin the " "chat!"
-        )
+        return await callback_query.answer("Something went wrong, Rejoin the " "chat!")
 
     if pending_user_id != pressed_user_id:
         return await callback_query.answer("This is not for you")
@@ -472,9 +544,7 @@ async def callback_query_welcome_button(_, callback_query):
     return await send_welcome_message(chat, pending_user_id, True)
 
 
-async def kick_restricted_after_delay(
-    delay, button_message: Message, user: User
-):
+async def kick_restricted_after_delay(delay, button_message: Message, user: User):
     """If the new member is still restricted after the delay, delete
     button message and join message and then kick him
     """
@@ -491,13 +561,11 @@ async def kick_restricted_after_delay(
     await _ban_restricted_user_until_date(group_chat, user_id, duration=delay)
 
 
-async def _ban_restricted_user_until_date(
-    group_chat, user_id: int, duration: int
-):
+async def _ban_restricted_user_until_date(group_chat, user_id: int, duration: int):
     try:
         member = await group_chat.get_member(user_id)
         if member.status == ChatMemberStatus.RESTRICTED:
-            until_date = (datetime.now() + timedelta(seconds=duration))
+            until_date = datetime.now() + timedelta(seconds=duration)
             await group_chat.ban_member(user_id, until_date=until_date)
     except UserNotParticipant:
         pass
@@ -528,11 +596,13 @@ async def captcha_state(_, message):
         try:
             keyboard = ikb(buttons, 1)
         except UnboundLocalError:
-            return await message.reply_text("Try Again after resetting captcha mode.\nUsage: `/captcha reset`")
+            return await message.reply_text(
+                "Try Again after resetting captcha mode.\nUsage: `/captcha reset`"
+            )
         await message.reply_text("**Current captcha mode:**", reply_markup=keyboard)
     elif state == "reset":
         await ecap_off(chat_id)
-        await message.reply("Done :-_-:") 
+        await message.reply("Done :-_-:")
     else:
         await message.reply_text(usage)
 
@@ -619,9 +689,7 @@ async def get_welcome_func(_, message):
     if not raw_text:
         return await message.reply_text("No welcome message set.")
     if not message.from_user:
-        return await message.reply_text(
-            "You're anon, can't send welcome message."
-        )
+        return await message.reply_text("You're anon, can't send welcome message.")
 
     await send_welcome_message(chat, message.from_user.id)
 
@@ -655,7 +723,7 @@ async def buttons_handlers(_, cb):
                     f"You can try again after 5 minutes.",
                 )
                 del CaptchaDB[cb.from_user.id]
-                until_date = (datetime.now() + timedelta(seconds=300))
+                until_date = datetime.now() + timedelta(seconds=300)
                 await cb.message.chat.ban_member(cb.from_user.id, until_date=until_date)
                 return
             markup = make_captcha_markup(
